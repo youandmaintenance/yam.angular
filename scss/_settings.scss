@@ -1,0 +1,88 @@
+@import '../vendor/normalize.scss/normalize';
+@import '../images/icons/compiled/icons.fallback';
+@import '../images/icons/compiled/icons.png';
+@import '../images/icons/compiled/icons.svg';
+
+@import 'media';
+@import 'mixins/flexbox';
+@import 'breakpoint';
+@import 'compass/css3';
+
+$grid_gutter: 12px;
+
+@import url("http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400");
+@import url("http://fonts.googleapis.com/css?family=Open+Sans:400,300,600");
+@import url("http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400");
+
+$mono_font_family: 'Source Code Pro', monospace;
+$color_theme: 'dark';
+
+$body_font_family: "Source Sans Pro", "Helvitica Neue", sans-serif;
+$body_font_weight: 300;
+$body_font_style: normal;
+
+$body_background_color: #fefefe;
+$body_color: #000;
+
+$text_ondark_color: #fff;
+
+$background_darken_factor: 25%;
+
+@if ($color_theme == 'dark') {
+
+  $body_font_weight: 200;
+  $body_background_color: #232527;
+  $body_color: #fff;
+
+  $background_darken_factor: 5%;
+}
+//@if ($color_theme == 'dark') {
+//  $body_color: #fff;
+//}
+
+// colors:
+$alert_color:   #fb431e;
+$error_color:   #c91300;
+$success_color: #6fff3c;
+
+$input_bg_color: lighten($body_background_color, 1%);
+$input_bg_color_active: 5%;
+$input_color: #000;
+$input_font_weight: 200;
+
+$button_default_background: rgba(#fff, 0);
+$button_default_color: white;
+
+@if ($color_theme == 'dark') {
+  $input_bg_color: lighten($body_background_color, 1%);
+  $input_bg_color_active: 5%;
+  $input_color: #fff;
+  $input_font_weight: 200;
+
+  /*$button_default_background: #85AC23;*/
+  $button_default_color: white;
+}
+
+@import 'colors';
+
+// breakpoints:
+$bp_default: 30em;
+$bp_small: 50em;
+$bp_decent: 60em;
+$bp_big: 80em;
+
+$icon_background_size: 100% 100%;
+
+$icon_height: 1.2em;
+$icon_height: 1.2em;
+$icon_border: .2em;
+
+$icon_background_size_large: $icon_background_size;
+$icon_height_large: 1.6em;
+$icon_height_large: 1.6em;
+$icon_border_large: .2em;
+
+$icon_background_size_small: $icon_background_size;
+$icon_height_small: .8em;
+$icon_height_small: .8em;
+$icon_border_small: .1em;

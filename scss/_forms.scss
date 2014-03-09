@@ -1,0 +1,492 @@
+// remove spinbutton:
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input, textarea {
+  width: 100%;
+  color: $input_color;
+  font-weight: $input_font_weight;
+  background-color: $input_bg_color;
+
+  padding: 0.6em;
+
+  border: none;
+
+  @include box-shadow(none);
+  @include transition(background-color 0.4s ease-out);
+
+  &:focus {
+    outline: none;
+    background-color: lighten($input_bg_color, $input_bg_color_active);
+  }
+
+}
+
+input[type=search],
+input[type=password] {
+  -webkit-appearance: textfield;
+}
+
+.form-element {
+}
+
+// yam form elements:
+
+.ym-select {
+  position: relative;
+  width: 100%;
+  margin: 12px 0;
+}
+.ym-select ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  background: #fff;
+}
+.ym-select .proforma-option, .proforma-optgroup {
+  cursor: pointer;
+  padding: 2px 2px;
+}
+.ym-select-label, .proforma-input {
+  -moz-transition: 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -webkit-transition: 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -ms-transition: 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -o-transition: 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  transition: 0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);
+}
+.ym-select.open .proforma-select-label, .proforma-select-label:hover, .proforma-input:hover {
+  background-color: #fff;
+}
+.ym-select-label, .proforma-input {
+  border: 1px solid #C9C6C6;
+  border-radius: 1px;
+}
+.ym-select-label {
+  overflow: hidden;
+}
+.ym-select-label:after {
+  float: right;
+  margin: 6px 4px;
+  display: block;
+  content: '\0020';
+  height: 100%;
+  border-top: 8px solid #666;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+.ym-select:hover .proforma-select-label:after {
+  border-top: 8px solid #444;
+}
+.ym-select-label:before {
+  position: relative;
+  float: left;
+  content: '.';
+  left: -100px;
+  display: block;
+  width: 1px;
+  text-indent: -10000px;
+}
+.ym-select-label {
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: #f0f0f0;
+}
+
+.ym-option {
+  border-bottom: 1px solid #f0f0f0;
+}
+/*.selected .ym-option {*/
+  /*border-bottom: 1px solid #fff;*/
+/*}*/
+.ym-option label, .proforma-optgroup label {
+  cursor: pointer;
+  display: block;
+  padding: 6px;
+}
+.ym-optgroup ul {
+  margin: 0;
+  padding: 0;
+}
+.ym-optgroup > label {
+  padding-left: 12px;
+  color: #d4d4d4;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ym-select .select {
+  position: absolute;
+  z-index: -100;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  top: 0;
+  border: none;
+  overflow: hidden;
+}
+.ym-select .selected {
+  /*background: #e2e2e2;*/
+  background: #f0f0f0;
+}
+
+.ym-select .proforma-select-options {
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  max-height: 150px;
+  overflow: hidden;
+}
+
+.ym-select-options {
+  background: #f0f0f0;
+  border-left: 1px solid #C9C6C6;
+  border-right: 1px solid #C9C6C6;
+  border-bottom: 1px solid #C9C6C6;
+  border-radius: 0 0 1px 1px;
+}
+.ym-select.open .proforma-select-label {
+  border-bottom: 1px solid #f0f0f0;
+}
+.ym-select-options, .radio,
+.ym-select-options, .checkbox {
+  @include transition(0.5s cubic-bezier(0.165, 0.840, 0.440, 1.000));
+}
+
+.ym-select-options.ng-enter {
+  opacity: 0;
+}
+
+.ym-select-options.ng-enter-active {
+  opacity: 1;
+}
+
+.ym-select-options.ng-leave {
+  opacity: 1;
+}
+.ym-select-options.ng-leave-active {
+  opacity: 0;
+}
+
+
+.ym-input-number {
+}
+.ym-input-number input {
+}
+
+.ym-input {
+  display: block;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.ym-input input {
+  font-size: 100%;
+  width: 100%;
+  padding: 6px 6px;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+.ym-input input:focus {
+  outline: none;
+}
+.input-number input {
+  display: block;
+  padding-right: 24px;
+}
+.input-number .spinners {
+  height: 100%;
+  width: 48px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  float: right;
+  border-left: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.input-number .spinner-up,
+.input-number .spinner-down {
+  width: 100%;
+  height: 50%;
+  text-align: center;
+  cursor: pointer;
+  padding: 6px 18px;
+}
+
+.input-number .spinner-up {
+  border-bottom: 1px solid #f0f0f0;
+}
+.input-number .spinner-up:after,
+.input-number .spinner-down:after {
+  text-align: center;
+  width: 1px;
+  display: block;
+  content: '\0020';
+  height: 100%;
+}
+.input-number .spinner-down:after {
+  border-top: 6px solid #666;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+.input-number .spinner-up:after {
+
+  border-bottom: 6px solid #666;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+.input-number .spinner-down:after {
+  background: #f0f0f0;
+  /*content: '-';*/
+}
+.ym-input.input-checkbox,
+.ym-input.input-radio {
+  cursor: pointer;
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.ym-input.input-radio {
+  border-radius: 12px;
+}
+.ym-input.input-radio .radio,
+.ym-input.input-checkbox .checkbox,
+.ym-input.input-checkbox input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.ym-input.input-checkbox {
+  background: #000;
+}
+.ym-input.input-radio,
+.ym-input.input-checkbox .checkbox {
+
+  z-index: 1;
+}
+.ym-input.input-radio input,
+.ym-input.input-checkbox input {
+  padding: 0;
+  margin: 0;
+  z-index: -1;
+  opacity: 0;
+}
+.ym-input.input-radio {
+  background: #fff;
+}
+.ym-input.input-radio .radio {
+  border: none;
+  background: #f0f0f0;
+  border-radius: 100%;
+  @include transform(scale(1));
+}
+.ym-input.input-radio .radio.checked,
+.ym-input.input-checkbox .checkbox.checked {
+  background: $button_default_background;
+  @include transform(scale(0.5));
+}
+
+.radio.ng-enter,
+.checkbox.ng-enter,
+.radio.ng-leave-active,
+.checkbox.ng-leave-active {
+  @include transform(scale(0.5));
+  @include opacity(0);
+}
+.radio.ng-enter-active,
+.checkbox.ng-enter-active,
+.radio.ng-leave,
+.checkbox.ng-leave {
+  @include transform(scale(1));
+  @include opacity(1);
+}
+
+
+
+$edit_button_width: 48px;
+$edit_right_padding: 64px;
+.ym-edit-field {
+
+  @if ($color_theme == 'dark') {
+    background-color: #333a40;
+  }
+
+  /*width: 100%;*/
+  /*float: left;*/
+  /*margin-right: $edit_right_padding;*/
+  padding-top: 12px;
+  padding-bottom: 12px;
+  > .button.edit, > button.edit {
+    &.active {
+      span {
+        @include opacity(0.5);
+      }
+    }
+    border: none;
+    background: none;
+    /*@extend .icon-edit;*/
+    /*background-position: center center;*/
+    float: left;
+    width: $edit_button_width;
+    span {
+      @extend .icon-edit;
+      background-size: 20px 20px;
+      background-position: center center;
+    }
+  }
+
+  .ym-input {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    margin-left: 0;
+    margin-left: $edit_button_width;
+    padding-right: $edit_button_width;
+    input {
+      padding: 0;
+    }
+  }
+}
+
+.ym-field-prototype {
+
+  &> .row {
+    position: relative;
+    padding-right: $edit_right_padding;
+    width: auto;
+    &.input {
+      background-color: #4E7B8A;
+      background-color: #5F6466;
+      background-color: #222324;
+      /*@include transition(background-color 0.4s ease-out);*/
+    }
+  }
+  aside {
+    background: none;
+    width: $edit_right_padding;
+    position: absolute;
+    top: 0;
+    right: 0;
+    .button.moveto-right, .button.moveto-left {
+      &:hover {
+        background-color: #4E7B8A;
+      }
+      span {
+        height: 44px;
+        background-size: 34px 34px;
+      }
+    }
+    .button.moveto-right {
+      span {
+        @extend .icon-arrow-right;
+      }
+    }
+    .button.moveto-left {
+      span {
+        @extend .icon-arrow-left;
+      }
+    }
+  }
+  header {
+    cursor: move;
+    padding: 0.3em 0.9em;
+    background: darken($body_background_color, 1%);
+    @include transition(background-color 0.4s ease-out);
+    small {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      font-weight: 400;
+      color: #334547;
+    }
+    &:hover {
+      background: lighten($body_background_color, 1%);
+    }
+  }
+
+  .button {
+
+    &.disabled {
+      span {
+        @include opacity(0.4);
+      }
+    }
+
+    span {
+      background-size: 24px 24px;
+      background-position: center center;
+    }
+
+    &.settings {
+      span {
+        @extend .icon-fader;
+      }
+    }
+
+    &.up {
+      span {
+        @extend .icon-arrow-up;
+      }
+    }
+
+    &.down {
+      span {
+        @extend .icon-arrow-down;
+      }
+    }
+
+    &.delete {
+      background: #1e1e1e;
+      span {
+        @extend .icon-close;
+      }
+      &.unlocked {
+        span {
+          @extend .icon-close-loaded;
+        }
+      }
+    }
+    /*width: 25%;*/
+  }
+  .button-row {
+
+    @if ($color_theme == 'dark') {
+      background-color: #232527;
+    }
+    clear: both;
+    .button {
+      width: 33.33333333%;
+      span {
+        background-position: 0.5em;
+      }
+
+      //&:hover {
+      //  @if ($color_theme == 'dark') {
+      //    background-color: darken(#232527, 2%);
+      //  }
+      //}
+
+      &:first-child {
+        span {
+        }
+      }
+
+      &:first-child {
+        //background-color: #3090b0;
+        span {
+        }
+      }
+    }
+  }
+}

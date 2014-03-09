@@ -1,0 +1,155 @@
+@import url("//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,700");
+@import 'settings';
+@import 'settings_login';
+@import 'base';
+@import 'icons';
+@import 'forms';
+@import 'buttons';
+
+//$columns: 4;
+//$columns_tablet: 8;
+//$columns_small: 12;
+//$columns_desktop: 16;
+//$columns_big: 18;
+//
+//$gutters: 0.2;
+//
+//$grids: $columns;
+//$grids: add-grid($columns_tablet at $tablet);
+//$grids: add-grid($columns_small at $small);
+//$grids: add-grid($columns_desktop at $desktop);
+//$grids: add-grid($columns_big at $big);
+//
+//html, body {
+//  height: 100%;
+//}
+//
+//body {
+//  background: #292E35;
+//  background: #FF9A03;
+//  /*@include background-grid($color: blue);*/
+//}
+//
+//.container {
+//  width: 100%;
+//  height: 100%;
+//}
+//
+//.login-form {
+//  padding: 12px;
+//  input::-webkit-input-placeholder { 
+//    color: rgba(#fff, 0.5); 
+//    font-weight: 100;
+//  }
+//  display: table;
+//  @extend .container;
+//  @include grid-span($columns, 1);
+//
+//  @include breakpoint($tablet) {
+//    @include grid-span(6, 2);
+//  }
+//  @include breakpoint($small) {
+//    @include grid-span(8, 3);
+//  }
+//  @include breakpoint($desktop) {
+//    @include grid-span(10, 4);
+//  }
+//  @include breakpoint($big) {
+//    @include grid-span(8, 6);
+//  }
+//}
+//
+//.form-column {
+//  &.first {
+//    @include breakpoint($small) {
+//      @include grid-span(8, 1, 10);
+//    }
+//    @include breakpoint($big) {
+//      .form-element {
+//        width: 48%;
+//        float: left;
+//        margin-left: 1%;
+//      }
+//      @include grid-span(6, 1, 8);
+//    }
+//  }
+//  //&.second {
+//  //  @include breakpoint($small) {
+//  //    @include grid-span(4, 5, 10);
+//  //  }
+//  //  @include breakpoint($big) {
+//  //    @include grid-span(3, 4, 8);
+//  //  }
+//  //}
+//  &.last {
+//    @include breakpoint($small) {
+//      @include grid-span(1, 9, 10);
+//    }
+//    @include breakpoint($big) {
+//      @include grid-span(2, 7, 8);
+//    }
+//  }
+//}
+//
+////login form:
+//form {
+//  &.login {
+//
+//
+//    /*background: red;*/
+//    width: 100%;
+//    height: 100%;
+//    display: table-cell;
+//    vertical-align: middle;
+//
+//
+//    .form-element {
+//      margin-bottom: 0.4em;
+//      z-index: 0;
+//      position: relative;
+//      background-position: 0.1em center;
+//      background-size: 12px 12px;
+//
+//      &.email, &.password {
+//      }
+//
+//      &.submit {
+//      }
+//
+//
+//      .icon {
+//        position: absolute;
+//        left: 0.4em;
+//        top: 50%;
+//        margin-top: - ($icon_height_large / 2);
+//        /*background-color: red;*/
+//        z-index: 100;
+//      }
+//      //&:before {
+//      //  position: absolute;
+//      //  left: 0.2em;
+//      //  height: 18px;
+//      //  width: 18px;
+//      //  background-color: red;
+//      //  content: '\0020';
+//      //  z-index: 100;
+//      //}
+//      //&.email {
+//      //  &:before {
+//      //    @extend .icon-login-mail;
+//      //  }
+//      //}
+//      //&.password {
+//      //  &:before {
+//      //    @extend .icon-login-password;
+//      //  }
+//      //}
+//    }
+//
+//    input[type=email],
+//    input[type=password] {
+//      position: relative;
+//      padding-left: $icon_height_large * 1.4;
+//    }
+//  }
+//}

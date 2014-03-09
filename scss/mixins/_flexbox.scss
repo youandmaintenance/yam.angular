@@ -1,0 +1,11 @@
+
+@mixin display-box-fallback() {
+    @include display-box(); 
+    @include experimental-value(display, flexbox, not -moz, not -webkit, not -o, -ms, not -khtml, not official);
+    @include experimental-value(display, flex, not -moz, -webkit, not -o, not -ms, not -khtml, official);
+}
+
+@mixin box-flex-fallback($value) {
+    @include box-flex($value); 
+    @include experimental(flex, $value, not -o, -ms, not -khtml, official);
+}

@@ -1,0 +1,9 @@
+<header>
+  <label>Title:
+    <input yam-article-title type="text" name="title" ng-model="title"/>
+  </label>
+  <label>Slug:
+    <input yam-article-slug type="text" name="slug" ng-model="slug"/>
+  </label>
+  <div ng-if="content" class="actions" ng-transclude></div>
+</header>

@@ -1,0 +1,17 @@
+body {
+  background: grey;
+}
+i, .icon {
+  float: left;
+  background-size: 100% 100%;
+  background-position: center center;
+  min-width: 1.2em;
+  height: 1.2em;
+  border: 0.2em solid transparent;
+  vertical-align: baseline;
+
+  &:after {
+    content: '\0020';
+  }
+
+}

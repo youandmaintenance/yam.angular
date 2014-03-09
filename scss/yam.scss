@@ -1,0 +1,354 @@
+@import 'settings';
+@import 'base';
+@import 'icons';
+@import 'forms';
+@import 'buttons';
+@import 'console';
+@import 'smyck';
+
+@mixin column-float ($pad: false, $gutter: $grid_gutter) {
+  float: left;
+  @if ($pad) {
+    padding-left: round($gutter/2);
+    padding-right: round($gutter/2);
+  }
+  @include clearfix();
+}
+
+.mainbg {
+ background-color: $body_background_color;
+}
+
+.maincl {
+ color: $body_background_color;
+}
+
+.darkbg {
+ background-color: darken($body_background_color, $background_darken_factor);
+}
+
+.darkcl {
+ color: darken($body_background_color, $background_darken_factor);
+}
+//$grids: 12;
+//$gutters: 0.1;
+
+header {
+  nav {
+    ul[role=navigation] {
+      display: none;
+    }
+  }
+}
+
+a {
+  text-decoration: none;
+}
+ul {
+  li {
+    @extend .box;
+  }
+}
+
+.container {
+  height: 100%;
+  width: 100%;
+}
+
+
+body {
+  height: 100%;
+}
+html {
+  height: 100%;
+}
+
+
+
+$yam_header_height: 2.8em;
+
+.container {
+  @include clearfix();
+}
+.content {
+  &.container {
+  //background: orange;
+  /*background: lighten($body_background_color, 5%);*/
+  }
+}
+
+#yam-container { 
+  position: relative;
+  height: auto;
+  min-height: 100%;
+  @include clearfix();
+  overflow: scroll;
+  //padding: $yam_header_height / 2;
+  //padding-top: $yam_header_height;
+}
+
+#ym-header {
+  left: 0;
+  position: absolute;
+  top: 0;
+  font-weight: 200;
+  width: 100%;
+  height: $yam_header_height;
+  @extend .mainbg;
+
+  nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  ul[role=navigation] {
+
+    li {
+      @extend .button;
+      display: block;
+      /*clear: both;*/
+      padding: 0;
+      margin: 0;
+      text-transform: uppercase;
+
+    }
+  }
+}
+
+ul[role=navigation] {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  a {
+    color: #fff;
+  }
+}
+
+
+// grid
+
+
+// field editor
+.tab-content {
+  &.inacitve {
+    display: none;
+  }
+}
+.stage {
+  @include breakpoint($target_small) {
+    width: 65%;
+    position: relative;
+    @include column-float(false);
+  }
+  @include breakpoint($target_medium) {
+    width: 80%;
+    position: relative;
+    @include column-float(false);
+    /*@include display-box-fallback();*/
+  }
+}
+.ym-field-prototype {
+  @extend .mainbg;
+  margin-bottom: 1px;
+  @extend .box;
+  position: relative;
+}
+aside {
+  @include breakpoint($target_small) {
+    @include column-float(false);
+    width: 35%;
+  }
+  @include breakpoint($target_medium) {
+    @include column-float(false);
+    width: 20%;
+  }
+}
+
+.field-column {
+
+  padding-top: 1px;
+  padding-right: 1px;
+  width: 100%; 
+  min-height: 100px;
+
+
+  @include breakpoint($target_medium) {
+    width: 50%;  
+    @include column-float(false);
+    /*@include box-flex-fallback(1);*/
+
+    /*float: left;*/
+    /*display: inline-block;*/
+    /*width: 50%;  */
+  } 
+}
+
+// tabs
+.ym-tabset {
+  @include clearfix;
+
+}
+
+.tab-content {
+  @include clearfix;
+  /*@extend .darkbg;*/
+}
+
+.ym-tab {
+  &.inactive {
+    display: none;
+  }
+}
+
+.tab-header {
+  @include breakpoint($target_medium) {
+    display: none;
+    //border-top: 1px solid darken($body_background_color, $background_darken_factor);
+    //border-right: 1px solid darken($body_background_color, $background_darken_factor);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  width: 100%;
+  overflow: hidden;
+  @include clearfix;
+
+  .tab-label {
+    label {
+      display: block;
+      overflow: hidden;
+      .counter {
+        display: block;
+        float: right;
+      }
+    }
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 12px;
+    float: left;
+    @include column-float;
+    width: 50%;
+
+    &.inactive {
+      @extend .darkbg;
+      color: $text_ondark_color;
+    }
+  }
+}
+
+aside {
+
+ //@extend .darkbg;
+ li {
+   @extend .mainbg;
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1px;
+ }
+}
+.ym-revolve {
+  left: 0;
+  position: relative;
+  @include transition(left 0.3s cubic-bezier(0.9, 0.1,0.1, 0.8));
+}
+.ym-revolve-option {
+
+  position: static;
+  @include clearfix;  
+  @include column-float;  
+
+  & > * {
+    @include column-float;  
+    /*padding-top: .8em;*/
+    /*padding-bottom: .8em;*/
+  } 
+
+  .cancel {
+    @extend .button;
+    width: 100%;
+    .icon {
+      display: block;
+    }
+    span {
+      text-align: center;
+      width: 100%;
+    }
+    background: rgb(108, 135, 136);
+
+    @include breakpoint($target_medium) {
+      width: 20%;
+      float: left;
+    }
+  }
+
+  .button-row {
+    //border-top: 1px solid darken($body_background_color, $background_darken_factor);
+    @include breakpoint($target_medium) {
+      width: 80%;
+      float: right;
+    }
+  }
+
+  .add-field {
+    width: 50%;
+    float: left;
+    //border-left: 1px solid darken($body_background_color, $background_darken_factor);
+    @extend .button;
+  }
+
+  .button {
+    padding-top: .8em;
+    padding-bottom: 1em;
+  }
+
+
+}
+
+.select-field {
+  display: table;
+  height: 100%;
+}
+//span.addfield {
+//  /*@include transform(translateY(50%));*/
+//  display: block;
+//  overflow: visible;
+//  margin-top: 1em;
+//  vertical-align: middle;
+//}
+
+.ym-console {
+  height: auto;
+  width: 100%;
+  //position: absolute;
+  top: 0;
+  z-index: 100000;
+  background: #222;
+
+  .tab-header {
+    display: block;
+  }
+  //display: none;
+}
+
+.ym-field-prototype {
+  .button {
+    position: relative;
+    //border-right: 2px solid darken($body_background_color, $background_darken_factor);
+  }
+}
+.fieldtype-header {
+  width: 100%;
+  @include clearfix;
+  .icon-fieldtype {
+    display: none;
+  }
+}
+button,.button {
+  /*background-color: transparent !important;*/
+}

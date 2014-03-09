@@ -1,0 +1,40 @@
+@import "../images/icons/compiled/icons.fallback";
+@import "../images/icons/compiled/icons.png";
+@import "../images/icons/compiled/icons.svg";
+
+i, .icon {
+  float: left;
+  background-size: $icon_background_size;
+  background-position: center center;
+  min-width: $icon_height;
+  height: $icon_height;
+  border: $icon_border solid transparent;
+  vertical-align: baseline;
+
+  &:after {
+    content: '\0020';
+  }
+
+  &.large {
+    background-size: $icon_background_size_large;
+    min-width:    $icon_height_large;
+    height:       $icon_height_large;
+    border-width: $icon_border_large;
+  }
+
+  &.small {
+    background-size: $icon_background_size_small;
+    min-width:    $icon_height_small;
+    height:       $icon_height_small;
+    border-width: $icon_border_small;
+  }
+}
+
+.icon {
+  cursor: pointer;
+  &.icon-add-left, &.icon-add-right {
+    background-size: 150% 150%;
+    width: 100%;
+    text-indent: -10000em;
+  }
+}

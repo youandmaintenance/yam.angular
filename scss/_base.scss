@@ -1,0 +1,64 @@
+* {
+  @include box-sizing(border-box);
+}
+
+html {
+  //height: 100%;
+  //min-height: 100%;
+}
+html, body {
+  font-family: $body_font_family;
+  font-weight: $body_font_weight;
+  font-style: $body_font_style;
+  color: $body_color;
+  background-color: $body_background_color;
+  font-size: 16px;  
+}
+
+body {
+  min-height: 100%;
+  height: 100%;
+}
+
+@mixin clearfix() {
+  //&:before,
+  //&:after {
+  //  content: " ";
+  //  display: table;
+  //}
+  &:before,
+  &:after {
+    content: '\0020';
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+  *zoom: 1;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.box {
+  //padding: 1.2em;
+  display: block;
+}
+
+.row {
+  @include clearfix;
+  width: 100%;
+}
+
+.small-box {
+  padding: 0.6em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
+  font-family: $body_font_family;
+  text-transform: uppercase;
+}
