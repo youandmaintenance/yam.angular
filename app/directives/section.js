@@ -2,13 +2,15 @@
   'use strict';
 
   var baseFieldSettings = {
-    transclude: false,
+    transclude: true,
+    replace: false,
     scope: {
       settings: '='
     },
     restrict: 'A',
     template:
-    '<div class="">'+
+    '<div class="ym-field-foo-settings">'+
+    '  <div class="whatever" ng-transclude></div>' +
     '  <label>Validation'+
     '    <input ym-input type="text" ng-model="settings.validation"/>'+
     '  </label>'+
@@ -26,7 +28,21 @@
    * @description
    *
    */
-  .directive('ymFieldPrototype', function () {
+  //.directive('ymFieldPrototype', function () {
+  //  return {
+  //    restrict: 'A',
+  //    link: function (scope, element, attrs) {
+  //      var model = scope.$eval(attrs.model);
+  //      attrs.$observe('sorting', function (sorting) {
+  //        model.sorting = scope.$eval(attrs.sorting);
+  //      });
+  //      attrs.$observe('position', function (position) {
+  //        model.position = scope.$eval(attrs.position);
+  //      });
+  //    }
+  //  };
+  //})
+  .directive('yymFieldPrototype', function () {
     return {
       scope: {
         ngModel: '=',

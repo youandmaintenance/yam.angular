@@ -2,25 +2,32 @@ module.exports = function (grunt) {
   'use strict';
 
   grunt.initConfig({
-    sass: {                            // Task
-      dist: {                          // Target
+    compass: {
+      dist: {
         options: {
-          includePaths: ['scss/'],
-          outputStyle: 'expanded'
-        },
-        files: {                             // Dictionary of files
-          'css/yam.css': 'scss/yam.scss'     // 'destination': 'source'
+          config: 'config.rb'
         }
-      },
+      }
     },
     watch: {
-      sass: {
-        files: ['scss/*.scss'],
-        tasks: ['scss'],
+      //jsTest: {
+      //  files: ['spec/{,*/}*.js'],
+      //  tasks: ['newer:jshint:test', 'karma']
+      //},
+      grunticon: {
+        files: ['images/icons/{,*/}*.svg'],
+        tasks: ['grunticon'],
         options: {
-          spawn: false,
-        },
+          spawn: true,
+        }
       },
+      compass: {
+        files: ['scss/*.scss'],
+        tasks: ['compass'],
+        options: {
+          spawn: true,
+        }
+      }
     },
     grunticon: {
       yamIcons: {
@@ -43,9 +50,19 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-grunticon');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-sass');
+  grunt.loadNpmTasks('grunt-contrib-compass');
+  //grunt.loadNpmTasks('grunt-sass');
 
-  grunt.registerTask('scss', ['sass']);
+  grunt.registerTask('compass', ['compass']);
   grunt.registerTask('default', ['watch']);
+  grunt.registerTask('watch', ['grunticon', 'compass']);
   grunt.registerTask('iconify', ['grunticon::yamIcons']);
+
+  //grunt.registerTask('test', [
+  //  'clean:server',
+  //  'concurrent:test',
+  //  'autoprefixer',
+  //  'connect:test',
+  //  'karma'
+  //]);
 };

@@ -6,8 +6,10 @@
     var url = 'http://yam.dev/myyam',
     api = 'v1';
 
+    console.log(url + '/api/' + api + '/sections/:id');
+
     var Section = $resource(
-      url + '/api/' + api + '/section:id',
+      url + '/api/' + api + '/sections/:id',
       {
         id: '@id'
       },

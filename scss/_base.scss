@@ -1,3 +1,12 @@
+@mixin column-float ($pad: false, $gutter: $grid_gutter) {
+  float: left;
+  @if ($pad) {
+    padding-left: round($gutter/2);
+    padding-right: round($gutter/2);
+  }
+  @include clearfix();
+}
+
 * {
   @include box-sizing(border-box);
 }
@@ -61,4 +70,33 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 300;
   font-family: $body_font_family;
   text-transform: uppercase;
+}
+
+.row {
+  .column {
+    @include column-float;
+    &.two {
+      width: 50%;
+    }
+
+    &.one {
+      width: 100%;
+    }
+
+    &.three {
+      width: 33.33333333333333%;
+    }
+
+    &.four {
+      width: 25%;
+    }
+
+    &.five {
+      width: 20%;
+    }
+
+    &.six {
+      width: 16.66666666666667%;
+    }
+  }
 }

@@ -135,16 +135,32 @@
       });
     }
 
+    var defaultFields = ['label', 'handle', 'type_id', 'section_uuid', 'required', 'validate'];
+
     function FieldPrototype(field, $scope) {
       var that = this;
       var promise = this;
-      this.label  = null;
-      this.handle = null;
 
-      angular.extend(this, field);
+      //this.label   = field.label;
+      //this.handle  = field.handle;
+      //this.type_id = field.type_id;
+
+
+      angular.forEach(defaultFields, function (key) {
+        that[key] = field[key] || null;
+      });
+
+      this.handle = 'new_field';
+
+      this.info = {
+        name: field.name
+      };
+
+      console.log('PROTOOOO', this, field);
+
+      //angular.extend(this, field);
       this.settings = angular.extend({}, this.defaults || {});
       setListener(this, $scope);
-
     }
 
     FieldPrototype.prototype = {
@@ -155,7 +171,17 @@
     return {
 
       createNew: function (field, scope) {
-        return new FieldPrototype(field, scope);
+        var f = new FieldPrototype(field, scope);
+        f.type_id = f.type_id || field.id;
+        return f;
+      },
+
+      createExisting: function (field, scope) {
+        var proto = this.createNew(field, scope);
+
+        console.log('Field', field);
+        angular.extend(proto, {id:field.id, fieldtype: field.fieldtype});
+        return proto;
       },
 
       createFromExisting: function (field, scope) {

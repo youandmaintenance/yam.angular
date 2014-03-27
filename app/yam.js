@@ -1,11 +1,16 @@
-(function (angular, exports, undefined) {
+(function (angular, exports, head, undefined) {
   'use strict';
+
+  var baseUrl = head.baseURI;
+  var ROOT    = baseUrl.split(location.origin)[1];
+
   var yam = exports.yam = angular.module(
     'yam', [
       'yamApp',
 //      'ymUtils',
+      'ngRoute',
+      //'ngResource',
       'ui.sortable',
-      'ngResource',
       'yamEntities',
       'matchmedia-ng'
     ],
@@ -17,31 +22,116 @@
       }
     ]
   )
-
   .config(
     [
-      'matchmediaProvider', 'yamEntityManagerProvider',
-      function (matchmediaProvider, yamEntityManagerProvider) {
+      '$routeProvider',
+      '$locationProvider',
+      'matchmediaProvider',
+      'yamAppConfigProvider',
+      'yamEntityManagerProvider',
+
+      function ($routeProvider, $locationProvider, matchmediaProvider, yamAppConfigProvider, yamEntityManagerProvider) {
+
+      /* =============================================================================
+       * Routing
+       * -----------------------------------------------------------------------------
+       *  Routes:
+       *   - section/:uuid
+       * =============================================================================
+       */
+
+        $routeProvider
+        .when(ROOT, {
+          controller: function () {
+            alert(ROOT);
+          },
+          template: '<h1>' + ROOT + '</h1>'
+        })
+        //.when(ROOT + '/scaffolds/section/new', {
+        //  controller: 'ScaffoldsSectionEditController',
+        //  controllerAs: 'ssec',
+        //  templateUrl:  ROOT + '/api/v1/templates/section/section.html',
+        //  resolve: {
+        //    Section: ['$q', '$route', 'SectionManager', function ($q, $route, SectionManager) {
+        //      var deferred = $q.defer();
+        //      deferred.resolve(SectionManager.new());
+        //      return deferred.promise;
+        //    }],
+        //    Sections: ['SectionManager', function (SectionManager) {
+        //      return SectionManager.all();
+        //    }]
+        //  }
+        //})
+        .when(ROOT + '/scaffolds/sections/:uuid', {
+          controller: 'ScaffoldsSectionEditController',
+          controllerAs: 'ssec',
+          templateUrl:  ROOT + '/api/v1/templates/section/section.html',
+          resolve: {
+            Section: ['$q', '$route', 'SectionManager', function ($q, $route, SectionManager) {
+              console.log('hey');
+              return SectionManager.fetch($route.current.params.uuid);
+            }],
+            Sections: ['SectionManager', function (SectionManager) {
+              return SectionManager.all();
+            }]
+          }
+        });
+
+
+        $locationProvider.html5Mode(true);
+
+      /* =============================================================================
+       * Media Queries
+       * -----------------------------------------------------------------------------
+       *  Breakpoints:
+       *   - 40em (tablet)
+       *   - 60em (desktop)
+       * =============================================================================
+       */
+
         matchmediaProvider.rules.desktop = '(min-width: 60em)';
         matchmediaProvider.rules.tablet = '(min-width: 40em)';
 
+      /* =============================================================================
+       * Entity Mapping
+       * -----------------------------------------------------------------------------
+       *  Entitties:
+       *   - Section
+       * =============================================================================
+       */
+        yamAppConfigProvider.baseUrl(baseUrl);
+        yamAppConfigProvider.api('api/v1');
+
+        //yamEntityManagerProvider.baseUrl(baseUrl);
+        //yamEntityManagerProvider.api('api/v1');
+
         // Set alias key mappings to the provider
-        yamEntityManagerProvider.keys.alias({
+        yamEntityManagerProvider.keys.setAliases({
           'fieldType': 'field_type'
         });
 
-        yamEntityManagerProvider.describe('Section');
+        yamEntityManagerProvider.describe('Section', {
+          urlOverride: 'sections',
+          id: 'uuid',
+          methods: yamEntityManagerProvider.methodTypes.ALL,
+          synthetic: false
+        });
 
-        yamEntityManagerProvider.describe('SectionFields', {
-            type    : 'type.type.field_type',
-            name    : 'type.name',
+        yamEntityManagerProvider.read('Section', {
+          fields: {
+            'type.field_type'    : 'type.type.field_type',
+            //name    : 'fieldtype.name',
             settings: 'setting.value._setting_',
           }
-        );
-
-        yamEntityManagerProvider.readUsing('Section', {
-          fields: 'SectionFields'
         });
+
+        //yamEntityManagerProvider.write('Section', {
+        //  fields: {
+        //    'type.type.field_type'    : 'type.field_type',
+        //    'type.name'               : 'name',
+        //    'setting.value._setting_' : 'settings',
+        //  }
+        //});
 
         console.log('CONF', yamEntityManagerProvider);
         //yamEntitiesProvider.manager.config.baseUrl= $document;
@@ -54,6 +144,17 @@
     $window.addEventListener('load', function() {
         FastClick.attach(document.body);
     }, false);
+  }]);
+
+
+  yam.factory('YamSectionManager', ['yamEntityManager', function (yamEntitiesProvider) {
+
+    return {
+      get: function () {
+
+      }
+    }
+
   }]);
 
 
@@ -81,33 +182,61 @@
 
   }]);
 
+  /**
+   *
+   */
+  function SectionBluePrintContoller($scope, FieldPrototype, yamEntityManager, Section) {
 
-  yam.controller('SectionBluePrintContoller',
-                 ['$scope', 'FieldPrototype', 'Section', 'ConsoleManager', 'yamEntityManager', '$http',
-         function ($scope, FieldPrototype, Section, ConsoleManager, yamEntityManager, $http) {
+  }
 
-    var controller = this;
-    var section = Section.create();
 
-    function Prototype(field) {
-      this.label = null;
-      angular.extend(this, field);
-      this.settings = angular.extend({}, this.defaults || {});
+  yam.controller('SectionBluePrintContoller', ['$scope', 'FieldPrototype', 'yamEntityManager', 'Section', function ($scope, FieldPrototype, yamEntityManager, Section) {
+
+    $scope.items = {left: [], right: []};
+    $scope.Section = Section;
+
+    if ($routeParams.uuid) {
+      $scope.Section.$get({uuid: $routeParams.uuid}).then(function () {
+        $scope.items = controller.prepareFields($scope.Section.fields);
+      });
     }
 
-    section.$get(function (section) {
+    //_Section.$get({uuid: '249fcb61-4253-47d5-80ab-e012e19e7727'}, function (section) {
+    //  $scope.section = section;
+    //  $scope.items = controller.prepareFields(section.fields);
+    //});
+    //
 
-      var s = yamEntityManager.read('Section', section);
+    $scope.alertMe = function () {
+      alert('you clicked the button');
+    };
+    $scope.save = function () {
+      var fields = $scope.items.left;
+      fields.push.apply(fields, $scope.items.right);
+      $scope.Section.fields = fields;
 
-      console.log('R', s);
-      console.log('R', section);
+      if ($scope.Section.uuid) {
+        $scope.Section.$put(function (section) {
+        });
+      } else {
+        $scope.Section.$save(function (section) {
+          $routeParams.uuid = $scope.Section.uuid;
+          console.log($routeParams);
+          console.log($location);
+          var url = [$location.$$path, $scope.Section.uuid].join('/');
+          //var url = $location.$$protocol + '://' + $location.$$host + [$location.$$path, $scope.Section.uuid].join('/');
+          console.log(url);
+          console.log($route);
+          //$location.path(url, false);
+        });
+      }
+    };
 
-      $scope.section = section;
-      $scope.items = controller.prepareFields(section.fields);
-      //ConsoleManager.push('remote', section);
-      //ConsoleManager.push('remote items', $scope.items);
-      //ConsoleManager.push('prototypes', $scope.items);
-    });
+    $scope.delete = function () {
+      $scope.Section.$delete(function (section) {
+        $scope.Section = yamEntityManager.getEntity('Section');
+      });
+    };
 
     this.prepareFields = function (fields) {
       var items = {left: [], right: []};
@@ -122,33 +251,12 @@
       return items;
     };
 
-    $scope.items = {};
+    $scope.items = {left: [], right: []};
     $scope.fields = [];
 
     $http.get('http://yam.dev/myyam/api/v1/section/fieldtypes').success(function (types) {
       $scope.fields = types;
     });
-
-    //$scope.fields = [
-    //  {
-    //    name: 'Input',
-    //    type: 'input',
-    //    defaults: {
-    //      required: true,
-    //      validation: null
-    //    }
-    //  },
-    //  {
-    //    name: 'Text',
-    //    type: 'text',
-    //    defaults: {}
-    //  },
-    //  {
-    //    name: 'Number',
-    //    type: 'float',
-    //    defaults: {}
-    //  }
-    //];
 
     ConsoleManager.push('fields', $scope.fields);
 
@@ -176,19 +284,6 @@
       $scope.items[object.position].splice(object.index + 1 , 0, object.field);
     };
 
-    $scope.sortOptions = {
-      handle: 'header.handle',
-      containment: '.stage',
-      cursor: 'move',
-      delay: 150,
-      opacity: 0.8,
-      forcePlaceholderSize: true,
-      placeholder: 'proto-placeholder',
-      connectWith: '.field-column',
-      update: function () {
-        //console.log(arguments);
-      }
-    };
 
     $scope.addItem = function (field, pos) {
 
@@ -206,7 +301,7 @@
 
   }]);
 
-  yam.controller('TabController', ['$scope', 'matchmedia', function ($scope, matchmedia) {
+  yam.controller('SsecTabController', ['$scope', 'matchmedia', function ($scope, matchmedia) {
     var listeners = [];
     $scope.isTablet = matchmedia.isTablet();
     $scope.isDesktop = matchmedia.isDesktop();
@@ -226,6 +321,22 @@
     $scope.$watch('isDesktop', function (desk) {
       $scope.tabset.disabled = desk;
     });
+
+    $scope.$parent.sortOptions = {
+      handle: 'header.handle',
+      containment: '.stage',
+      cursor: 'move',
+      delay: 150,
+      opacity: 0.8,
+      forcePlaceholderSize: true,
+      placeholder: 'proto-placeholder',
+      connectWith: '.field-column',
+      update: function () {
+        //console.log(arguments);
+      }
+    };
+
+    console.log($scope);
 
     //$scope.$watch('isTablet', function (tablet) {
     //  console.log('media tablet');
@@ -258,6 +369,20 @@
       }, function () {
       });
     };
+  }]);
+
+  yam.controller('SectionHeaderController', ['$scope', '$http', function ($scope, $http) {
+
+    //  var setHandle = _.debounce(function (label) {
+    //      if (label) {
+    //        $http.get('/myyam/api/v1/slug/'+ label).success(function (data) {
+    //          $scope.Section.handle = data.slug && data.slug.value;
+    //        });
+    //      }
+    //  }, 500);
+
+    //$scope.$watch('Section.name', setHandle);
+
   }]);
 
   yam.controller('ArticleController', ['$scope', function ($scope) {
@@ -345,4 +470,4 @@
     };
   }]);
 
-}(this.angular, this));
+}(this.angular, this, this.document.head));

@@ -6,15 +6,6 @@
 @import 'console';
 @import 'smyck';
 
-@mixin column-float ($pad: false, $gutter: $grid_gutter) {
-  float: left;
-  @if ($pad) {
-    padding-left: round($gutter/2);
-    padding-right: round($gutter/2);
-  }
-  @include clearfix();
-}
-
 .mainbg {
  background-color: $body_background_color;
 }
@@ -39,6 +30,13 @@ header {
       display: none;
     }
   }
+}
+
+#yam-header {
+  margin-top: -48px;
+  width: 100%;
+  position: fixed;
+  z-index: 1000;
 }
 
 a {
@@ -78,6 +76,7 @@ $yam_header_height: 2.8em;
 }
 
 #yam-container { 
+  padding-top: 48px;
   position: relative;
   height: auto;
   min-height: 100%;
@@ -239,7 +238,7 @@ aside {
   }
 }
 
-aside {
+.select-row {
 
  //@extend .darkbg;
  li {
@@ -351,4 +350,34 @@ aside {
 }
 button,.button {
   /*background-color: transparent !important;*/
+}
+
+.menu-toggle {
+  padding: 12px;
+  width: 48px;
+  height: 48px;
+  & > * {
+    position: relative;
+    border-top: 4px solid #fff;
+    border-bottom: 4px solid #fff;
+    width: 100%;
+    height: 100%;
+
+    &:after {
+      position: absolute;
+      top: 50%;
+      margin-top: -2px;
+      content: '\0020';
+      height: 4px;
+      background: #fff;
+      width: 100%;
+    }
+  }
+}
+.ym-settings-container {
+  padding: 16px;
+}
+
+.test {
+  width: 100px;
 }

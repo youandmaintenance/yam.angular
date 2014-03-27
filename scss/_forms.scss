@@ -184,7 +184,7 @@ input[type=password] {
   display: block;
   padding: 12px;
   position: relative;
-  overflow: hidden;
+  /*overflow: hidden;*/
 }
 .ym-input input {
   font-size: 100%;
@@ -270,22 +270,35 @@ input[type=password] {
 }
 
 .ym-input.input-checkbox {
-  background: #000;
+  background: rgba(#000, .4);
 }
 .ym-input.input-radio,
 .ym-input.input-checkbox .checkbox {
 
   z-index: 1;
 }
+
 .ym-input.input-radio input,
 .ym-input.input-checkbox input {
   padding: 0;
-  margin: 0;
+  margin-bottom: 22px;
   z-index: -1;
-  opacity: 0;
+  display: none;
 }
+
 .ym-input.input-radio {
   background: #fff;
+}
+
+.ym-input.input-checkbox .checkbox {
+  @include transform(scale(0.5));
+}
+label {
+  padding: 12px;
+  .ym-input.input-checkbox {
+    display: inline-block;
+    float: left;
+  }
 }
 .ym-input.input-radio .radio {
   border: none;
@@ -295,8 +308,11 @@ input[type=password] {
 }
 .ym-input.input-radio .radio.checked,
 .ym-input.input-checkbox .checkbox.checked {
-  background: $button_default_background;
-  @include transform(scale(0.5));
+  @extend .icon-check;
+  background-size: 24px 24px;
+  /*background: $button_default_background;*/
+  /*background: green;*/
+  @include transform(scale(1));
 }
 
 .radio.ng-enter,
@@ -488,5 +504,29 @@ $edit_right_padding: 64px;
         }
       }
     }
+  }
+}
+
+
+header {
+  &.edit {
+    input[type=text] {
+      padding: 0.5em;
+      font-size: 1.8em;
+      &:focus {
+        background-color: rgba(#fff, 0.1);
+      }
+    }
+  }
+}
+
+.ym-zip-list { 
+  & > .indicator {
+    display: block;
+    text-indent: -10000em;
+    overflow: hidden;
+    @extend .icon-arrow-down;
+    background-size: 24px 24px;
+    background-position: center center;
   }
 }

@@ -1,4 +1,4 @@
-/* global Class */
+/* global Klass */
 /* global _ */
 
 (function (undefined) {
@@ -7,6 +7,13 @@
 
   var ENM_PREFIX = 'enm_';
   var registry = {};
+  var methodTypes = {
+    ALL   : ['get', 'post', 'put', 'delete'],
+    GET   : 'get',
+    POST  : 'post',
+    PUT   : 'put',
+    DELETE: 'delete'
+  };
 
   /**
    * @name objectGet
@@ -17,7 +24,8 @@
    * @return {mixed}
    */
   function objectGet(ns, object) {
-    var key, keys, len, _o;
+    var key, keys, len, pointer,
+    a, alen;
 
     if (!angular.isString(ns)) {
       return object;
@@ -25,14 +33,31 @@
 
     keys = ns.split('.');
     len = keys.length;
-    _o = object;
+    pointer = object;
 
     while (len > 0 && object !== null) {
       key = keys.shift();
-      _o = _o[key] || null;
+
+      if (!pointer[key]) {
+        return;
+      }
+
+      if (_.isArray(pointer[key]) && len > 1) {
+        var i = 0;
+        a = [];
+        ns = keys.join('.');
+        alen = pointer[keys].length;
+        for (; i < alen; i++) {
+          a.push(objectGet(ns, pointer[keys][i]));
+        }
+        pointer = a;
+        break;
+      }
+
+      pointer = pointer[key] || null;
       len--;
     }
-    return _o;
+    return pointer;
   }
 
   /**
@@ -43,25 +68,43 @@
    * @param  {Object}  object: configuration object;
    * @return void
    */
-  function objectSet(ns, value, object) {
-    var _o,
+  function objectSet(ns, value, object, distributeValue) {
+
+    if (!object) {
+      return;
+    }
+
+    var pointer,
     keys = ns.split('.'),
     key,
+    alen,
     len = keys.length;
-    _o = _o || object;
+    pointer = pointer || object;
 
     while (len > 0) {
       key = keys.shift();
-      _o[key] = (len === 1) ? value : (_o[key] || {});
-      _o = _o[key];
+      pointer[key] = (len === 1) ? value : (pointer[key] || {});
+
+      if (_.isArray(pointer[key])) {
+        var i = 0, distribute = distributeValue && _.isArray(value);
+        ns = keys.join('.');
+        alen = pointer[key].length;
+
+        for (; i < alen; i++) {
+          objectSet(ns, distribute ? value[i] : value, pointer[keys][i]);
+        }
+        break;
+      }
+
+      pointer = pointer[key];
       len--;
     }
   }
 
   /**
-   * @class UnregisteredEntityException
+   * @Klass UnregisteredEntityException
    */
-  var UnregisteredEntityException = Class.factory(Error, function EntityUnregisteredException () {
+  var UnregisteredEntityException = Klass.factory(Error, function EntityUnregisteredException () {
     this.parentConstruct();
   });
 
@@ -75,11 +118,13 @@
   }
 
   /**
-   * @class EntityKeys
+   * @Klass EntityKeys
    */
-  var EntityKeys = Class.factory(function EntityKeys(manager) {
+  var EntityKeys = Klass.factory(function EntityKeys(manager) {
     this.manager = manager;
-    registry[this.manager.uuid] = {};
+    registry[this.manager.uuid] = {
+      aliases: {}
+    };
   }, {
     alias: function (key) {
       return registry[this.manager.uuid].aliases[key] || key;
@@ -102,23 +147,32 @@
   });
 
   /**
-   * @class EntityMapper
+   * @Klass PropertyMapper
    */
-  var EntityMapper = Class.factory(
+  var PropertyMapper = Klass.factory(
     null,
-    function EntityMapper() {
+    function PropertyMapper() {
       this.map = {};
       //this.entity = angular.extend({}, data);
     }, {
 
       /**
-       * @member EntityMapper.describe
+       * @member PropertyMapper.describe
        *
        * @param  {string}  target
        * @param  {string}  source
        */
       describe: function (target, source) {
-        console.log(target);
+        var that = this;
+        if (angular.isObject(source)) {
+          return this.describe(target, function(object, clone) {
+            angular.forEach(source, function (sval, skey) {
+              objectSet(skey, objectGet(sval, clone), object);
+            });
+            return object;
+          });
+        }
+
         this.map[target] = _.isFunction(source) ?
           function () {
           return source.apply(null, arguments);
@@ -130,30 +184,32 @@
         };
       },
 
-      /**
-       * @member EntityMapper.getEntity
-       *
-       * @param  {string}  target
-       * @param  {string}  source
-       */
-      getEntity: function () {
-        var that = this;
-        angular.forEach(this.map, function (fn, key) {
-          objectSet(key, that.entity , fn(that.data));
-        });
-        return this.entity;
-      },
-      get: function (data) {
+      apply: function (data) {
         var clone = angular.copy(data);
+
         angular.forEach(this.map, function (fn, key) {
-          objectSet('$originalAttributes.' + key, objectGet(key, data), data);
-          objectSet(key, fn(data, key), clone);
+
+          var kval = objectGet(key, clone);
+
+          if (angular.isArray(kval)) {
+            angular.forEach(kval, function (kdata) {
+              applyMapping(kdata, angular.copy(kdata), key, fn);
+            });
+          } else {
+            applyMapping(data, clone, key, fn);
+          }
         });
+
         angular.extend(data, clone);
         return data;
       }
     }
   );
+
+  function applyMapping(data, clone, key, fn) {
+    //objectSet('$originalAttributes.' + key, objectGet(key, data), data);
+    objectSet(key, fn(data, clone, key), clone);
+  }
 
   function mapUsing(withMapper, mapper, mapKey) {
     withMapper.describe(mapKey, function (val, key) {
@@ -172,20 +228,132 @@
     });
   }
 
-  function configure(mamager) {
+  function configure(manager, $resource, $config) {
     // do something;
+    registry[manager.uuid].$resource = $resource;
+    manager.config = angular.extend({}, {url: $config.url, api: $config.api});
+  }
+
+  function createMapper(registry, mapperKey, mapper, entity, properties, rw) {
+
+    if (!registry[entity]) {
+      return unregisteredEntityException();
+    }
+
+    objectSet(mapperKey, mapper, registry[entity]);
+    registry[entity][rw].properties = properties;
+
+    angular.forEach(properties || {}, function (source, target) {
+      registry[entity][rw].mapper.describe(target, source);
+    });
+  }
+
+  function applyTransform(manager, entity, data, method) {
+    var object = angular.fromJson(data);
+
+    if (_.isArray(object)) {
+      _.each(object, function (obj) {
+        manager[method](entity, obj);
+      });
+    } else {
+      manager[method](entity, object);
+    }
+
+    return object;//angular.toJson(object);
+  }
+
+  function isScalar(value) {
+    return !angular.isArray(value) || !angular.isObject(value);
+  }
+
+  function flipKeys(object) {
+    var o = {};
+    angular.forEach(object, function (value, key) {
+      if (angular.isObject(value)) {
+        o[key] = flipKeys(value);
+      } else if (angular.isString(value)) {
+        o[value] = key;
+      } else {
+        o[key] = value;
+      }
+    });
+    return o;
+  }
+
+  function createResourceConstructor(manager, options, entity) {
+    var id,
+    methods = {},
+
+    transformResponse = function (data) {
+      if (!data) {
+        return data;
+      }
+
+      if (!manager.hasReader(entity)) {
+        return data;
+      }
+      return applyTransform(manager, entity, data, 'readProperties');
+    },
+
+    transformRequest = function (data) {
+      console.log('transform', data);
+      if (!data) {
+        return data;
+      }
+
+      if (!manager.hasWriter(entity)) {
+        if (manager.hasReader(entity)) {
+          // invert key/values if a read mapping exists
+
+          console.log(registry[manager.uuid][entity].read.properties);
+          manager.write(entity, flipKeys(registry[manager.uuid][entity].read.properties));
+          console.log(registry[manager.uuid][entity].write.properties);
+        } else {
+          return data;
+        }
+      }
+      var obj = applyTransform(manager, entity, data, 'writeProperties');
+      console.log('write Applied', angular.copy(obj));
+      return angular.toJson(obj);
+    };
+
+    angular.forEach((_.isArray(options.methods) ? options.methods : [options.methods]) || methodTypes.ALL, function (method) {
+      methods[method] = {
+        method: method.toUpperCase(),
+        transformResponse: transformResponse,
+        transformRequest: transformRequest,
+      };
+    });
+
+    methods['save'] = {
+      action: 'save',
+      method: 'POST',
+      transformResponse: transformResponse,
+      transformRequest: transformRequest,
+    };
+
+    return function (manager, entity) {
+      var idParam = {}, Constructor,
+      url = [manager.config.url, manager.config.api, options.urlOverride || entity.toLowerCase()].join('/');
+      id  = options.id || 'id';
+      idParam[id] = '@' + id;
+
+      Constructor = manager.getResource()(url + '/:' + id, idParam, methods);
+
+      return Constructor;
+    };
   }
 
   /**
-   * @class EntityManager
+   * @Klass EntityManager
    * @param {object} config: configuration object;
    */
-  var EntityManager = Class.factory(
+  var EntityManager = Klass.factory(
     function EntityManager() {
-    this.config = {};
     this.uuid = _.uniqueId(ENM_PREFIX);
     registry[this.uuid] = {};
     this.keys = new EntityKeys(this);
+    registry[this.uuid].config = {};
   }, {
 
     /**
@@ -196,8 +364,14 @@
      * @param  {Object}  write
      * @throws {Object}  UnregisteredEntityException
      */
-    $get: [function () {
-      configure(this);
+    $get: ['$resource', 'yamAppConfig', function ($resource, yamAppConfig) {
+      configure(this, $resource, yamAppConfig);
+      var that = this;
+
+      this.getResource = function () {
+        return $resource;
+      };
+
       return this;
     }],
 
@@ -209,21 +383,50 @@
      * @param  {Object}  write
      * @throws {Object}  UnregisteredEntityException
      */
-    describe: function (entity, read, write) {
-      var that = this;
+    describe: function (entity, config) {
+      config = config || {
+        synthetic: true
+      };
+
       registry[this.uuid][entity] = registry[this.uuid][entity] || {};
-      objectSet('read.mapper',  new EntityMapper(this), registry[this.uuid][entity]);
-      objectSet('write.mapper', new EntityMapper(this), registry[this.uuid][entity]);
 
-      angular.forEach(read || {}, function (source, target) {
-        registry[that.uuid][entity].read.mapper.describe(target, source);
-      });
-
-      angular.forEach(write || {}, function (source, target) {
-        registry[that.uuid][entity].write.mapper.describe(target, source);
-      });
-
+      if (!config.sythetic) {
+        registry[this.uuid][entity].resource = {
+          constructor: createResourceConstructor(this, config, entity)
+        };
+      }
       return this;
+    },
+    /**
+     * @member EntityManager.read
+     *
+     * @param  {string}  entity
+     * @param  {string}  key
+     * @param  {string}  value
+     * @throws {Error}   UnregisteredEntityException
+     */
+    read: function (entity, properties) {
+      createMapper(registry[this.uuid], 'read.mapper', new PropertyMapper(this), entity, properties, 'read');
+    },
+
+    /**
+     * @member EntityManager.hasReader
+     *
+     * @param   {string}  entity
+     * @return  {Boolean} value
+     */
+    hasReader: function (entity) {
+      return !!registry[this.uuid][entity].read;
+    },
+
+    /**
+     * @member EntityManager.hasWriter
+     *
+     * @param   {string}  entity
+     * @return  {Boolean} value
+     */
+    hasWriter: function (entity) {
+      return !!registry[this.uuid][entity].write;
     },
 
     /**
@@ -265,16 +468,53 @@
       registry[this.uuid][entity].read.mapper.describe(key, value);
     },
 
+    write: function (entity, properties) {
+      createMapper(registry[this.uuid], 'write.mapper', new PropertyMapper(this), entity, properties, 'write');
+    },
+
     /**
-     * @member EntityManager.defineRead
+     * @member EntityManager.getEntity
      *
-     * @param  {string}  entity
-     * @param  {string}  key
-     * @param  {string}  value
-     * @throws {Error}   UnregisteredEntityException
+     * @param  {String} entity
+     * @return {Object} value
+     * @throws {Error}  UnregisteredEntityException
      */
-    read: function (entity, data) {
-      return registry[this.uuid][entity].read.mapper.get(data);
+    getEntity: function (entity) {
+      var instance = new (this.getEntityConstructor(entity));
+      console.log(instance);
+      return instance;
+    },
+
+    /**
+     * @member EntityManager.getEntity
+     *
+     * @param  {String} entity
+     * @return {Object} value
+     * @throws {Error}  UnregisteredEntityException
+     */
+    hasEntity: function (entity) {
+      return !!registry[this.uuid][entity];
+    },
+
+    /**
+     * @member EntityManager.getEntityConstructor
+     *
+     * @param  {String}   entity
+     * @return {Function} value
+     * @throws {Error}    UnregisteredEntityException
+     */
+    getEntityConstructor: function(entity) {
+      var Res;
+
+      if (!registry[this.uuid][entity]) {
+        return unregisteredEntityException(entity);
+      }
+
+      if (!registry[this.uuid][entity].Constructor) {
+        Res = registry[this.uuid][entity].resource.constructor(this, entity);
+        registry[this.uuid][entity].Constructor = Res;
+      }
+      return registry[this.uuid][entity].Constructor;
     },
 
     /**
@@ -287,6 +527,14 @@
      */
     writeUsing: function (entity, data) {
       return registry[this.uuid][entity].read.mapper.get(data);
+    },
+
+    readProperties: function (entity, data) {
+      registry[this.uuid][entity].read.mapper.apply(data);
+    },
+
+    writeProperties: function (entity, data) {
+      registry[this.uuid][entity].write.mapper.apply(data);
     },
 
     /**
@@ -304,12 +552,11 @@
       }
 
       registry[this.uuid][entity].write.mapper.describe(key, value);
-    }
-  });
+    },
 
-  EntityManager.prototype.$get = [function () {
-    return this;
-  }];
+    methodTypes: methodTypes,
+
+  });
 
   angular.module('yamEntities', ['ngResource'])
 
@@ -318,5 +565,7 @@
     api: undefined
   })
 
-  .provider('yamEntityManager', EntityManager);
+  .provider('yamEntityManager', [function (config) {
+    return new EntityManager();
+  }]);
 }());

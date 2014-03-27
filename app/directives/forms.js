@@ -43,10 +43,12 @@
       }
       compiled.text(scope, function (clone) {
         clone.addClass('input-' + attrs.type.toLowerCase());
+        clone.addClass(attrs.class);
         if (!(element instanceof jQuery)) {
           element.after(clone);
         }
         element.wrap(clone);
+        element.removeClass(attrs.class);
       });
     };
   }());
@@ -283,29 +285,104 @@
     return new CheckableController(scope, element, attrs, controllers);
   }
 
+  var radioListeners = {};
+  var radioCompiled;
+  var checkBoxCompiled;
+
   /**
    * @see angularjs issue #4970
    */
   inputTypes.checkbox = (function () {
-    return function (scope, element, attrs, controllers, transclusion, $compile, $window, $timeout, $animate) {
-      var listener,
-      controller = new CheckableController(scope, element, attrs, controllers);
+    var compiled,
+    template = checkableTemplates.checkbox;
+    return function (scope, element, attrs, ngModel, transclusion, $compile, $window, $timeout, $animate, $parse) {
+      var el, eq;
 
-      if (!compiled.checkable) {
-        compiled.checkable = $compile(controller.getTemplate());
+      if (!compiled) {
+        compiled = $compile(template);
       }
 
-      compiled.checkable(scope, function (clone, $scope) {
-        var elements = clone.children(),
-        fakeBox = elements.eq(0);
+      compiled(scope, function (clone) {
         element.after(clone);
         clone.append(element);
-        listener = controller.onChange(fakeBox, $animate, $timeout);
+        el = clone;
+        eq = clone.children().eq(0);
+      });
+
+      //ngModel.$viewChangeListeners.push(function () {
+
+      //});
+
+      var $watcher = scope.$new(true);
+      $watcher.model = ngModel;
+
+      $watcher.$watch('model.$modelValue', function (value) {
+        if (value) {
+          $animate.addClass(eq, 'checked');
+        } else {
+          $animate.removeClass(eq, 'checked');
+        }
+        //alert('das');
+        //console.log();
+      });
+
+      el.on('click', function (e) {
+        //e.preventDefault();
+        //e.stopPropagation();
+        scope.$apply(function () {
+          element.prop('checked', !ngModel.$modelValue);
+          ngModel.$setViewValue(!ngModel.$modelValue);
+        });
       });
     };
   }());
 
-  inputTypes.radio = inputTypes.checkbox;
+  inputTypes.radio = (function () {
+    var compiled;
+    var template = checkableTemplates.radio,
+    groups = {};
+
+    //template = '<div class="test-radio"><div class="radio"></div></div>';
+
+    return function (scope, element, attrs, ngModel, transclusion, $compile, $window, $timeout, $animate) {
+      var el, eq;
+
+      groups[attrs.name] = groups[attrs.name] || [];
+      groups[attrs.name].push({radio: element, model: ngModel});
+
+      if (!compiled) {
+        compiled = $compile(template);
+      }
+
+      compiled(scope, function (clone) {
+        element.after(clone);
+        clone.append(element);
+        el = clone;
+        eq = clone.children().eq(0);
+      });
+
+      var $watcher = scope.$new(true);
+      $watcher.model = ngModel;
+
+      $watcher.$watch('model.$modelValue', function (value) {
+        angular.forEach(groups[attrs.name], function (obj) {
+            var eq = obj.radio.parent().children().eq(0);
+            if (obj.radio.prop('checked')) {
+              $animate.addClass(eq, 'checked');
+            } else {
+              $animate.removeClass(eq, 'checked');
+            }
+        });
+      });
+
+      el.on('click', function () {
+        scope.$apply(function () {
+          element.prop('checked', true);
+          ngModel.$setViewValue(attrs.value);
+        });
+      });
+    };
+  }());
 
   inputTypes.date = (function () {
     return function (scope, element, attrs, controllers, transclusion, $compile, $window, $timeout) {
@@ -317,17 +394,16 @@
     };
   }());
 
-  var inputDirective = ['$compile', '$window', '$timeout', '$animate', function ($compile, $window, $timeout, $animate) {
+  var inputDirective = ['$compile', '$window', '$timeout', '$animate', '$parse', function ($compile, $window, $timeout, $animate, $parse) {
     return {
-      priority: 12000,
+      priority: -10000,
       restrict: 'EA',
-      require: '?ngModel',
+      require: '?^ngModel',
       compile: function (tElement, tAttrs, transclusion) {
-        console.log('__compile__');
         compiled[tAttrs.type] = false;
         return function (scope, element, attrs, controllers) {
           if (controllers && typeSupported(attrs.type)) {
-            inputTypes[attrs.type.toLowerCase()](scope, element, attrs, controllers, transclusion, $compile, $window, $timeout, $animate);
+            inputTypes[attrs.type.toLowerCase()](scope, element, attrs, controllers, transclusion, $compile, $window, $timeout, $animate, $parse);
           }
         };
       }
@@ -339,7 +415,7 @@
   .directive('ymEditField', function ($compile) {
 
     return {
-      priority: 11000,
+      priority: -100000,
       replace: true,
       tranclude: 'element',
       scope: {},
@@ -379,11 +455,70 @@
             clone.find('.ym-input').append(element);
           });
         };
-      }
-      , template: '<input ym-input-nowrap="true" ng-disabled="disabled"/>'
+      },
+      template: '<input ym-input-nowrap="true" ng-disabled="disabled"/>'
     };
   })
-  .directive('ymLoadUnlock', ['$window', function ($window) {
+  .directive('ymLoadUnlock', ['$window', '$parse', function ($window, $parse) {
+    return {
+      compile: function (element, attrs)  {
+        var fn = $parse(attrs.ymLoadUnlock);
+        return function(scope, element, attrs) {
+
+          var unlocked = false;
+          element.on('click', function(event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (unlocked) {
+              scope.$apply(function() {
+                fn(scope, {$event:event});
+              });
+              return unload();
+            }
+
+            unlocked = true;
+            attrs.$addClass('unlocked');
+            angular.element($window.document).on('click', unload);
+            scope.$apply();
+
+          });
+
+          function unload() {
+            scope.$apply(function () {
+              unlocked = false;
+              attrs.$removeClass('unlocked');
+              angular.element($window.document).off('click', unload);
+            });
+          }
+        };
+      }
+    };
+  }])
+  .directive('ymZipList', [function () {
+    return {
+      restrict: 'AE',
+      transclude: true,
+      replace: true,
+      scope: {
+        visible: '@'
+      },
+      link: function (scope, element, attrs) {
+        scope.visible = false;
+        scope.toggle = function () {
+          scope.visible = !scope.visible;
+        };
+      },
+      template:
+      '<div class="ym-zip-list"><button ng-click="toggle()" class="indicator">click</button>' +
+      '  <div ng-show="visible">' +
+      '    <div ng-transclude></div>' +
+      '  </div>' +
+      '</div>'
+    };
+  }])
+  .directive('yymLoadUnlock', ['$window', function ($window) {
     return {
       restrict: 'A',
       treminal: true,
@@ -395,10 +530,13 @@
 
         scope.unlocked = false;
 
+        console.log('ELEMENT', element);
+
         element.on('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
 
+          alert('you clicked');
           if (scope.unlocked) {
             scope.trigger();
             return unload();

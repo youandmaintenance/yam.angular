@@ -124,7 +124,7 @@
   };
 
   Factory.create = objectCreate;
-  exports.Class =  {
+  exports.Klass =  {
     factory: Factory,
     extend:  extend,
     object:  objectCreate,

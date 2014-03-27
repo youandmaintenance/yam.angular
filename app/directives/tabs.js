@@ -13,10 +13,13 @@
     return {
       replace: true,
       transclude: true,
-      require: '^ymTabset',
+      require: '?^ymTabset',
       restrict: 'AE',
       link: function (scope, element, attrs, ctrl) {
 
+        if (!ctrl) {
+          return;
+        }
         var $watch = scope.$new(true);
         var wasActive = false;
         var resolving = scope.$eval(attrs.ymTabResolving);
